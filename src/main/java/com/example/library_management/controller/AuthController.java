@@ -1,0 +1,53 @@
+package com.example.library_management.controller;
+
+import com.example.library_management.factory.AuthWindowFactory;
+import com.example.library_management.factory.BookWindowFactory;
+import com.example.library_management.repository.AuthRepository;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.stage.Stage;
+
+public class AuthController {
+    @FXML private TextField usernameField;
+    @FXML private PasswordField passwordField;
+
+    private final AuthRepository authRepository = new AuthRepository();
+
+    @FXML
+    private void handleLogin(ActionEvent event) {
+        String username = usernameField.getText().trim();
+        String password = passwordField.getText();
+        if (username.isEmpty() || password.isEmpty()) {
+            showError("Missing data", "Enter your username and password.");
+            return;
+        }
+        try {
+            if (authRepository.authenticate(username, password)) {
+                Stage stage = (Stage) usernameField.getScene().getWindow();
+                Scene scene = BookWindowFactory.createScene();
+                stage.setTitle("Library Management System");
+                stage.setScene(scene);
+            } else {
+                showError("Login failed", "Invalid username or password.");
+            }
+        } catch (Exception e) {
+            showError("Login error", e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleOpenSignUp(ActionEvent event) throws Exception {
+        Stage stage = (Stage) usernameField.getScene().getWindow();
+        stage.setScene(AuthWindowFactory.createSignUpScene());
+        stage.setTitle("Sign Up");
+    }
+
+    private void showError(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR, message, ButtonType.OK);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.showAndWait();
+    }
+}
